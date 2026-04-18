@@ -246,6 +246,7 @@ const fullname = ref("");
 const contact_number = ref("");
 const address = ref("");
 const id_type = ref("");
+const file = ref(null);
 const imgData = ref("");
 const office_id = ref("");
 const purpose = ref("");
@@ -274,18 +275,18 @@ const resetForm = () => {
   shareLink.value = "";
 };
 
-const handleFileChange = async (event) => {
-  const file = event.target.files?.[0];
-  if (!file) {
-    imgData.value = "";
+const handleFileChange = (event) => {
+  const selected = event.target.files?.[0];
+  if (!selected) return;
+
+  if (selected.size > 5 * 1024 * 1024) {
+    alert("File too large! Max 5MB only.");
     return;
   }
 
-  const reader = new FileReader();
-  reader.onload = () => {
-    imgData.value = reader.result || "";
-  };
-  reader.readAsDataURL(file);
+  file.value = selected;
+
+  imgData.value = URL.createObjectURL(selected);
 };
 
 const fetchOffices = async () => {
@@ -337,24 +338,30 @@ const onSubmit = async () => {
   loading.value = true;
 
   try {
-    const payload = {
-      visitor_id: selectedVisitor.value?.id,
-      fullname: selectedVisitor.value ? undefined : fullname.value,
-      contact_number: selectedVisitor.value ? undefined : contact_number.value,
-      address: selectedVisitor.value ? undefined : address.value,
-      id_type: id_type.value,
-      img: imgData.value,
-      office_id: office_id.value,
-      purpose: purpose.value,
-    };
+    const formData = new FormData();
 
-    const data = await visitorLogStore.registerVisit(payload);
+    if (!selectedVisitor.value) {
+      formData.append("fullname", fullname.value);
+      formData.append("contact_number", contact_number.value);
+      formData.append("address", address.value);
+    }
+
+    formData.append("id_type", id_type.value);
+    formData.append("office_id", office_id.value);
+    formData.append("purpose", purpose.value);
+
+    if (file.value) {
+      formData.append("img", file.value);
+    }
+
+    const data = await visitorLogStore.registerVisit(formData);
+
     showSuccessModal.value = true;
     shareLink.value = data.link;
+
     resetForm();
-    selectedVisitor.value = null;
   } catch (err) {
-    error.value = err?.message || "Failed to register visitor and create log.";
+    error.value = err?.message || "Failed to register visitor.";
   } finally {
     loading.value = false;
   }

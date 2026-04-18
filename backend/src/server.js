@@ -32,6 +32,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Routes
+app.use("/uploads", express.static("uploads"));
 app.use("/api/users", authRoutes);
 app.use("/api/visit-logs", visitorLogRoutes);
 app.use("/api/visitors", visitorRoutes);

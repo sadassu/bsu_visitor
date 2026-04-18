@@ -1,6 +1,7 @@
 import express from "express";
 import VisitorLogController from "../controllers/VisitorLogController.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
+import upload from "../middleware/upload.js";
 
 const router = express.Router();
 
@@ -11,7 +12,12 @@ router.get(
   VisitorLogController.getPendingByUserOffice,
 );
 router.get("/:id", authMiddleware, VisitorLogController.getById);
-router.post("/register", authMiddleware, VisitorLogController.register);
+router.post(
+  "/register",
+  upload.single("img"),
+  authMiddleware,
+  VisitorLogController.register,
+);
 router.post("/", authMiddleware, VisitorLogController.create);
 router.put("/:id", authMiddleware, VisitorLogController.update);
 router.delete("/:id", authMiddleware, VisitorLogController.delete);

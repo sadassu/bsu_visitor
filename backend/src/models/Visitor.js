@@ -43,14 +43,21 @@ class Visitor {
 
   static update(id, visitorData) {
     const { fullname, contact_number, address, id_type, img } = visitorData;
-    
+
     const stmt = db.prepare(`
       UPDATE visitors 
       SET fullname = ?, contact_number = ?, address = ?, id_type = ?, img = ?
       WHERE id = ?
     `);
-    
-    const result = stmt.run(fullname, contact_number, address, id_type, img, id);
+
+    const result = stmt.run(
+      fullname,
+      contact_number,
+      address,
+      id_type,
+      img,
+      id,
+    );
     return result.changes > 0;
   }
 
@@ -58,7 +65,7 @@ class Visitor {
     const stmt = db.prepare(`
       DELETE FROM visitors WHERE id = ?
     `);
-    
+
     const result = stmt.run(id);
     return result.changes > 0;
   }

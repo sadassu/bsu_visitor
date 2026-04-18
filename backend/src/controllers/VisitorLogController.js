@@ -11,13 +11,19 @@ class VisitorLogController {
         contact_number,
         address,
         id_type,
-        img,
         office_id,
         purpose,
       } = req.body;
 
       if (!office_id) {
         return res.status(400).json({ error: "office_id is required" });
+      }
+
+      const parsedOfficeId = Number(office_id);
+
+      let img = null;
+      if (req.file) {
+        img = `uploads/${req.file.filename}`;
       }
 
       let visitor = null;
@@ -59,24 +65,32 @@ class VisitorLogController {
 
       const logId = VisitLog.create({
         visitor_id: visitor.id,
-        office_id,
+        office_id: parsedOfficeId,
         purpose,
         logged_by: req.user?.id || null,
       });
 
-      const token = VisitorLink.create(visitor.id, office_id);
+      const token = VisitorLink.create(visitor.id, parsedOfficeId);
+
       const origin =
         process.env.CLIENT_URL || `${req.protocol}://${req.get("host")}`;
+
       const link = `${origin}/visitor-access/${token}`;
 
-      res.status(201).json({
+      const baseUrl = `${req.protocol}://${req.get("host")}`;
+
+      if (visitor.img) {
+        visitor.img = `${baseUrl}/${visitor.img}`;
+      }
+
+      return res.status(201).json({
         visitor,
         logId,
         link,
         expires_in_seconds: 3600,
       });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
   }
 

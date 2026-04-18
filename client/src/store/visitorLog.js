@@ -28,7 +28,6 @@ export const useVisitorLogStore = defineStore("visitorLog", {
   }),
 
   actions: {
-    // ✅ NEW: FETCH BY STATUS
     async fetchByStatus({ status, page = 1, perPage = 20 }) {
       this.loading = true;
       this.error = null;
@@ -71,7 +70,7 @@ export const useVisitorLogStore = defineStore("visitorLog", {
       return this.fetchByStatus({ status: "pending", page, perPage });
     },
 
-    async registerVisit(payload) {
+    async registerVisit(formData) {
       this.loading = true;
       this.error = null;
 
@@ -80,9 +79,9 @@ export const useVisitorLogStore = defineStore("visitorLog", {
           method: "POST",
           credentials: "include",
           headers: {
-            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
-          body: JSON.stringify(payload),
+          body: formData, 
         });
 
         const data = await handleResponse(response);
