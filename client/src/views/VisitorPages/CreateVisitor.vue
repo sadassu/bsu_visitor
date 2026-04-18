@@ -98,13 +98,16 @@
           ></textarea>
         </div>
 
-        <div class="grid gap-6 sm:grid-cols-2">
+        <!-- ID TYPE + PHOTO (HIDDEN WHEN VISITOR SELECTED) -->
+        <div v-if="!selectedVisitor" class="grid gap-6 sm:grid-cols-2">
           <div>
             <label
               for="id_type"
               class="block text-sm font-medium text-slate-700"
-              >ID type</label
             >
+              ID type
+            </label>
+
             <select
               id="id_type"
               v-model="id_type"
@@ -118,21 +121,23 @@
           </div>
 
           <div>
-            <label for="photo" class="block text-sm font-medium text-slate-700"
-              >Visitor photo</label
-            >
+            <label for="photo" class="block text-sm font-medium text-slate-700">
+              Visitor photo
+            </label>
+
             <input
               id="photo"
               type="file"
               accept="image/*"
               capture="environment"
               @change="handleFileChange"
-              :disabled="!!selectedVisitor"
               class="mt-2 w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 shadow-sm outline-none transition file:cursor-pointer file:border-0 file:bg-red-800 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white focus:border-red-800 focus:ring-2 focus:ring-red-800/20"
             />
+
             <p class="mt-2 text-sm text-slate-500">
               Upload a photo or take one with your camera.
             </p>
+
             <div v-if="imgData" class="mt-4">
               <p class="text-sm font-medium text-slate-700">Preview</p>
               <img
@@ -332,32 +337,44 @@ const clearSelection = () => {
 };
 
 const onSubmit = async () => {
+  loading.value = true;
   error.value = "";
   success.value = "";
   shareLink.value = "";
-  loading.value = true;
 
   try {
     const formData = new FormData();
 
-    if (!selectedVisitor.value) {
+    if (selectedVisitor.value) {
+      formData.append("visitor_id", selectedVisitor.value.id);
+    }
+    else {
+      if (!fullname.value || !contact_number.value || !address.value) {
+        error.value = "fullname, contact number, and address are required.";
+        return;
+      }
+
       formData.append("fullname", fullname.value);
       formData.append("contact_number", contact_number.value);
       formData.append("address", address.value);
+      formData.append("id_type", id_type.value || "");
+
+      if (file.value) {
+        formData.append("img", file.value);
+      }
     }
 
-    formData.append("id_type", id_type.value);
     formData.append("office_id", office_id.value);
-    formData.append("purpose", purpose.value);
+    formData.append("purpose", purpose.value || "");
 
-    if (file.value) {
-      formData.append("img", file.value);
-    }
+    const res = await visitorLogStore.registerVisit(formData);
 
-    const data = await visitorLogStore.registerVisit(formData);
+    const data = res?.data || res;
+
+    success.value = "Visitor registered successfully!";
+    shareLink.value = data.link;
 
     showSuccessModal.value = true;
-    shareLink.value = data.link;
 
     resetForm();
   } catch (err) {
