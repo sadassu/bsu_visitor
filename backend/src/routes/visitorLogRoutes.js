@@ -5,6 +5,11 @@ import { authMiddleware } from "../middleware/authMiddleware.js";
 const router = express.Router();
 
 router.get("/", authMiddleware, VisitorLogController.getAll);
+router.get(
+  "/pending",
+  authMiddleware,
+  VisitorLogController.getPendingByUserOffice,
+);
 router.get("/:id", authMiddleware, VisitorLogController.getById);
 router.post("/register", authMiddleware, VisitorLogController.register);
 router.post("/", authMiddleware, VisitorLogController.create);

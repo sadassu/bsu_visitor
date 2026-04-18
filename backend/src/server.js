@@ -12,15 +12,21 @@ import visitorRoutes from "./routes/visitorRoutes.js";
 import officeRoutes from "./routes/officeRoutes.js";
 import visitorLinkRoutes from "./routes/visitorLinkRoutes.js";
 import roleRoutes from "./routes/roleRoutes.js";
+import visitorStatusRoutes from "./routes/visitorStatusRoutes.js";
 
 const app = express();
 
 // Middleware
 app.use(helmet());
-app.use(cors({
-  origin: [process.env.CLIENT_URL, 'intussusceptive-skimpily-ona.ngrok-free.dev'],
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: [
+      process.env.CLIENT_URL,
+      "intussusceptive-skimpily-ona.ngrok-free.dev",
+    ],
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -31,6 +37,7 @@ app.use("/api/visit-logs", visitorLogRoutes);
 app.use("/api/visitors", visitorRoutes);
 app.use("/api/offices", officeRoutes);
 app.use("/api/visitor-links", visitorLinkRoutes);
+app.use("/api/visitor-status", visitorStatusRoutes);
 app.use("/api/roles", roleRoutes);
 // Health check
 app.get("/api/health", (req, res) => {
@@ -40,7 +47,7 @@ app.get("/api/health", (req, res) => {
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(err.status || 500).json({
-    message: "Internal Server Error"
+    message: "Internal Server Error",
   });
 });
 

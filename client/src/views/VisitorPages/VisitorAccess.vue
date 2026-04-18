@@ -56,7 +56,8 @@
             <div class="mt-4 text-sm text-slate-600 space-y-1">
               <p><strong>Latitude:</strong> {{ office.latitude }}</p>
               <p><strong>Longitude:</strong> {{ office.longitude }}</p>
-              <p><strong>Altitude:</strong> 0</p>
+              <p><strong>Distance:</strong> {{ formatDistance }} away</p>
+              <p><strong>Direction:</strong> {{ direction }}</p>
             </div>
           </div>
         </div>
@@ -66,8 +67,7 @@
             AR destination marker
           </p>
           <p class="mt-2 text-sm text-slate-500">
-            Point a mobile device camera at the world and follow the red AR
-            marker to your destination.
+            Point your camera toward the marker. The arrow points to your destination.
           </p>
 
           <div class="mt-4 flex flex-wrap gap-3">
@@ -109,6 +109,9 @@
             <span :class="gpsAllowed ? 'text-emerald-700' : 'text-amber-600'"
               >GPS: {{ gpsAllowed ? "Granted" : "Not Granted" }}</span
             >
+            <span v-if="gpsAccuracy" class="text-slate-600"
+              >Accuracy: ±{{ gpsAccuracy }}m</span
+            >
           </div>
 
           <div
@@ -141,18 +144,119 @@
                 renderer="antialias: true; alpha: true"
                 style="width: 100%; height: 100%"
               >
-                <a-camera gps-new-camera="gpsMinDistance: 5"></a-camera>
+                <a-camera 
+                  gps-new-camera="gpsMinDistance: 0; simulateLatitude: 0; simulateLongitude: 0; positionMinAccuracy: 10"
+                  rotation-reader
+                ></a-camera>
 
-                <!-- Big glowing marker, visible through walls -->
+                <!-- Precise destination marker with multiple visual layers -->
+                
+                <!-- Main glowing sphere - visible from distance -->
                 <a-entity
                   :gps-new-entity-place="gpsPlace"
                   position="0 0 0"
-                  scale="20 20 20"
+                  scale="15 15 15"
                   geometry="primitive: sphere; radius: 1"
-                  material="color: #ff4444; opacity: 0.65; transparent: true; shader: flat; side: double"
-                  gltf-model="#"
+                  material="color: #ff3333; opacity: 0.4; transparent: true; shader: flat; side: double"
                 ></a-entity>
-                
+
+                <!-- Inner bright core -->
+                <a-entity
+                  :gps-new-entity-place="gpsPlace"
+                  position="0 0 0"
+                  scale="8 8 8"
+                  geometry="primitive: sphere; radius: 1"
+                  material="color: #ff0000; opacity: 0.7; transparent: true; emissive: #ff0000; emissiveIntensity: 0.5"
+                ></a-entity>
+
+                <!-- Direction arrow - points toward destination -->
+                <a-entity
+                  :gps-new-entity-place="gpsPlace"
+                  position="0 5 0"
+                  scale="10 10 10"
+                >
+                  <a-entity
+                    geometry="primitive: cone; radiusBottom: 0.5; radiusTop: 0; height: 1.5"
+                    material="color: #ff4444; emissive: #ff0000; emissiveIntensity: 0.3"
+                    position="0 0.75 0"
+                    animation="property: rotation; to: 0 360 0; dur: 4000; loop: true; easing: linear"
+                  ></a-entity>
+                  <a-entity
+                    geometry="primitive: cylinder; radius: 0.15; height: 1"
+                    material="color: #ff4444"
+                    position="0 0 0"
+                  ></a-entity>
+                </a-entity>
+
+                <!-- Ground ring for precise location -->
+                <a-entity
+                  :gps-new-entity-place="gpsPlace"
+                  position="0 -2 0"
+                  scale="12 12 12"
+                  geometry="primitive: torus; radius: 1; radiusTubular: 0.03"
+                  material="color: #ff6666; emissive: #ff0000; emissiveIntensity: 0.2"
+                  rotation="90 0 0"
+                  animation="property: scale; to: 13 13 13; dur: 1500; dir: alternate; loop: true; easing: easeInOutQuad"
+                ></a-entity>
+
+                <!-- Pulsing rings for better visibility -->
+                <a-entity
+                  :gps-new-entity-place="gpsPlace"
+                  position="0 0 0"
+                  scale="10 10 10"
+                  geometry="primitive: ring; radiusInner: 0.9; radiusOuter: 1"
+                  material="color: #ff0000; opacity: 0.6; transparent: true; side: double"
+                  animation="property: scale; to: 18 18 18; dur: 2000; loop: true; easing: easeOutCubic"
+                  animation__opacity="property: material.opacity; to: 0; dur: 2000; loop: true; easing: easeOutCubic"
+                ></a-entity>
+
+                <!-- Distance text -->
+                <a-entity
+                  :gps-new-entity-place="gpsPlace"
+                  position="0 8 0"
+                  look-at="[camera]"
+                  scale="15 15 15"
+                >
+                  <a-text
+                    :value="distanceText"
+                    align="center"
+                    color="#ffffff"
+                    width="4"
+                    anchor="center"
+                    position="0 0 0"
+                    scale="0.5 0.5 0.5"
+                    background-color="#cc0000"
+                    background-opacity="0.8"
+                    padding="0.1"
+                    wrap-count="20"
+                  ></a-text>
+                </a-entity>
+
+                <!-- Vertical beacon beam -->
+                <a-entity
+                  :gps-new-entity-place="gpsPlace"
+                  position="0 20 0"
+                  scale="3 20 3"
+                  geometry="primitive: cylinder; radius: 0.5; height: 2"
+                  material="color: #ff0000; opacity: 0.15; transparent: true"
+                  animation="property: material.opacity; to: 0.3; dur: 1500; dir: alternate; loop: true"
+                ></a-entity>
+
+                <!-- Floating particles for enhanced visibility -->
+                <a-entity
+                  v-for="i in 8"
+                  :key="i"
+                  :gps-new-entity-place="gpsPlace"
+                  :position="`${Math.sin(i * Math.PI / 4) * 4} ${i * 1.5} ${Math.cos(i * Math.PI / 4) * 4}`"
+                  scale="3 3 3"
+                >
+                  <a-sphere
+                    radius="0.1"
+                    color="#ff4444"
+                    opacity="0.8"
+                    animation="property: position; to: 0 0 0; dur: 2000; loop: true; dir: alternate; easing: easeInOutQuad"
+                  ></a-sphere>
+                </a-entity>
               </a-scene>
             </div>
           </div>
@@ -164,7 +268,7 @@
 
 <script setup>
 import Navbar from "../../components/Navbar.vue";
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useRoute } from "vue-router";
 
 const route = useRoute();
@@ -177,22 +281,103 @@ const isWebcamSupported = ref(false);
 onMounted(() => {
   isWebcamSupported.value = !!navigator?.mediaDevices?.getUserMedia;
 });
+
 const cameraAllowed = ref(false);
 const gpsAllowed = ref(false);
 const cameraRequesting = ref(false);
 const gpsRequesting = ref(false);
 const permissionError = ref("");
+const currentPosition = ref(null);
+const gpsAccuracy = ref(null);
+const distance = ref(0);
+const bearing = ref(0);
+
 const gpsPlace = computed(() => {
   if (!office.value) return "";
   return `latitude: ${office.value.latitude}; longitude: ${office.value.longitude}`;
 });
 
+const formatDistance = computed(() => {
+  if (!distance.value) return "Calculating...";
+  if (distance.value < 1) {
+    return `${Math.round(distance.value * 1000)} meters`;
+  }
+  return `${distance.value.toFixed(2)} km`;
+});
+
+const direction = computed(() => {
+  if (!bearing.value) return "Calculating...";
+  const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+  const index = Math.round(bearing.value / 45) % 8;
+  return `${bearing.value.toFixed(0)}° (${directions[index]})`;
+});
+
+const distanceText = computed(() => {
+  if (!distance.value) return "Calculating...";
+  if (distance.value < 0.1) {
+    return "You've arrived!";
+  }
+  return `${formatDistance.value}\n${direction.value}`;
+});
+
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+  const R = 6371; // Earth's radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+};
+
+const calculateBearing = (lat1, lon1, lat2, lon2) => {
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const y = Math.sin(dLon) * Math.cos(lat2 * Math.PI / 180);
+  const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) -
+            Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos(dLon);
+  let brng = Math.atan2(y, x) * 180 / Math.PI;
+  return (brng + 360) % 360;
+};
+
+let watchId = null;
+
+const updatePosition = (position) => {
+  currentPosition.value = position;
+  gpsAccuracy.value = Math.round(position.coords.accuracy);
+  
+  if (office.value) {
+    distance.value = calculateDistance(
+      position.coords.latitude,
+      position.coords.longitude,
+      office.value.latitude,
+      office.value.longitude
+    );
+    
+    bearing.value = calculateBearing(
+      position.coords.latitude,
+      position.coords.longitude,
+      office.value.latitude,
+      office.value.longitude
+    );
+  }
+  
+  gpsAllowed.value = true;
+};
+
 const requestCamera = async () => {
   cameraRequesting.value = true;
   permissionError.value = "";
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    stream.getTracks().forEach(track => track.stop()); // Stop the stream immediately
+    const stream = await navigator.mediaDevices.getUserMedia({ 
+      video: { 
+        facingMode: 'environment',
+        width: { ideal: 1920 },
+        height: { ideal: 1080 }
+      } 
+    });
+    stream.getTracks().forEach(track => track.stop());
     cameraAllowed.value = true;
   } catch (err) {
     permissionError.value = "Camera access denied or not available.";
@@ -209,16 +394,33 @@ const requestGps = () => {
     gpsRequesting.value = false;
     return;
   }
+  
   navigator.geolocation.getCurrentPosition(
     (position) => {
-      gpsAllowed.value = true;
+      updatePosition(position);
       gpsRequesting.value = false;
+      
+      // Start watching position for updates
+      if (watchId) {
+        navigator.geolocation.clearWatch(watchId);
+      }
+      watchId = navigator.geolocation.watchPosition(
+        updatePosition,
+        (err) => {
+          permissionError.value = "Error tracking location: " + err.message;
+        },
+        { 
+          enableHighAccuracy: true, 
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
     },
     (err) => {
       permissionError.value = "Location access denied or not available.";
       gpsRequesting.value = false;
     },
-    { enableHighAccuracy: true, timeout: 10000 }
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
   );
 };
 
@@ -251,7 +453,14 @@ const loadVisitorAccess = async () => {
 };
 
 onMounted(loadVisitorAccess);
+
+onUnmounted(() => {
+  if (watchId) {
+    navigator.geolocation.clearWatch(watchId);
+  }
+});
 </script>
+
 <style scoped>
 .a-scene-container canvas,
 .a-scene canvas {

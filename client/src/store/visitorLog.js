@@ -28,39 +28,36 @@ export const useVisitorLogStore = defineStore("visitorLog", {
   }),
 
   actions: {
-    async fetchVisitLogs({
-      visitorName = "",
-      startDate = "",
-      endDate = "",
-      page = 1,
-      perPage = 20,
-    } = {}) {
+    // ✅ NEW: FETCH BY STATUS
+    async fetchByStatus({ status, page = 1, perPage = 20 }) {
       this.loading = true;
       this.error = null;
 
       try {
         const params = new URLSearchParams({
-          page: String(page),
-          per_page: String(perPage),
+          limit: String(perPage),
+          offset: String((page - 1) * perPage),
         });
 
-        if (visitorName) params.append("visitor_name", visitorName);
-        if (startDate) params.append("start_date", startDate);
-        if (endDate) params.append("end_date", endDate);
-
         const response = await fetch(
-          `${VISITOR_LOG_ENDPOINT}?${params.toString()}`,
+          `${API_BASE}/visitor-status/status/${status}?${params.toString()}`,
           {
-            credentials: "include",
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
           },
         );
 
         const data = await handleResponse(response);
-        console.log("Fetched visit logs:", data);
-        this.logs = data.logs || [];
+
+        console.log(`Fetched ${status} logs:`, data);
+
+        this.logs = data.rows || [];
         this.total = data.total || 0;
-        this.page = data.page || page;
-        this.perPage = data.per_page || perPage;
+        this.page = page;
+        this.perPage = perPage;
+
         return data;
       } catch (error) {
         this.error = error.message;
@@ -68,6 +65,10 @@ export const useVisitorLogStore = defineStore("visitorLog", {
       } finally {
         this.loading = false;
       }
+    },
+
+    async fetchPendingVisitLogs({ page = 1, perPage = 20 } = {}) {
+      return this.fetchByStatus({ status: "pending", page, perPage });
     },
 
     async registerVisit(payload) {

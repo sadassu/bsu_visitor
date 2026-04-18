@@ -4,6 +4,7 @@ import User from "../models/User.js";
 const ALLOWED_STATUSES = new Set(["available", "busy", "not available"]);
 
 class OfficeController {
+  
   static getAll(req, res) {
     try {
       const offices = Office.findAll();

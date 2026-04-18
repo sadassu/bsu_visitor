@@ -4,7 +4,7 @@ import { authMiddleware } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.get("/", OfficeController.getAll);
+router.get("/", authMiddleware, OfficeController.getAll);
 router.get("/staff/dashboard", authMiddleware, OfficeController.getStaffOfficeDashboard);
 router.patch("/:id/status", authMiddleware, OfficeController.updateStatus);
 

@@ -37,7 +37,8 @@ class VisitorLogController {
       if (!visitor) {
         if (!fullname || !contact_number || !address) {
           return res.status(400).json({
-            error: "fullname, contact_number, and address are required for a new visitor",
+            error:
+              "fullname, contact_number, and address are required for a new visitor",
           });
         }
 
@@ -64,7 +65,8 @@ class VisitorLogController {
       });
 
       const token = VisitorLink.create(visitor.id, office_id);
-      const origin = process.env.CLIENT_URL || `${req.protocol}://${req.get("host")}`;
+      const origin =
+        process.env.CLIENT_URL || `${req.protocol}://${req.get("host")}`;
       const link = `${origin}/visitor-access/${token}`;
 
       res.status(201).json({
@@ -84,20 +86,39 @@ class VisitorLogController {
       const logged_by = req.user?.id || req.body.logged_by || null;
 
       if (!visitor_id || !office_id) {
-        return res.status(400).json({ error: "visitor_id and office_id are required" });
+        return res
+          .status(400)
+          .json({ error: "visitor_id and office_id are required" });
       }
 
-      const logId = VisitLog.create({ visitor_id, office_id, purpose, logged_by });
+      const logId = VisitLog.create({
+        visitor_id,
+        office_id,
+        purpose,
+        logged_by,
+      });
 
-      res.status(201).json({ message: "Visitor log created successfully", logId });
+      res
+        .status(201)
+        .json({ message: "Visitor log created successfully", logId });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
   }
 
+  // This method is for admin users to view all logs with optional filters and pagination
   static getAll(req, res) {
     try {
-      const { visitor_id, office_id, active, visitor_name, start_date, end_date, page = 1, per_page = 20 } = req.query;
+      const {
+        visitor_id,
+        office_id,
+        active,
+        visitor_name,
+        start_date,
+        end_date,
+        page = 1,
+        per_page = 20,
+      } = req.query;
       const pageNumber = Number(page) || 1;
       const perPage = Number(per_page) || 20;
       const offset = (pageNumber - 1) * perPage;
@@ -176,6 +197,41 @@ class VisitorLogController {
       res.json({ message: "Visitor log updated successfully" });
     } catch (error) {
       res.status(500).json({ error: error.message });
+    }
+  }
+
+  // This method is for staff users to view pending visits related to their assigned offices with pagination
+  static getPendingByUserOffice(req, res) {
+    try {
+      const userId = req.user?.id;
+
+      if (!userId) {
+        return res.status(401).json({
+          error: "Unauthorized: user not found",
+        });
+      }
+
+      const { limit = 20, offset = 0 } = req.query;
+
+      const result = VisitLog.findPendingByUserOffice({
+        userId,
+        limit: Number(limit),
+        offset: Number(offset),
+      });
+
+      return res.json({
+        success: true,
+        data: result.rows,
+        total: result.total,
+        limit: Number(limit),
+        offset: Number(offset),
+      });
+    } catch (err) {
+      console.error("getPendingByUserOffice error:", err);
+
+      return res.status(500).json({
+        error: "Internal server error",
+      });
     }
   }
 

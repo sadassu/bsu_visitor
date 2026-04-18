@@ -65,14 +65,27 @@ class VisitLog {
     const rows = db
       .prepare(
         `
-      SELECT l.*, v.fullname AS visitor_name, v.contact_number, v.address AS visitor_address, o.office_name
-      FROM visit_logs l
-      JOIN visitors v ON v.id = l.visitor_id
-      JOIN offices o ON o.id = l.office_id
-      ${whereClause}
-      ORDER BY l.time_in DESC
-      LIMIT ? OFFSET ?
-    `,
+    SELECT 
+      l.*,
+      vl.token,
+      v.fullname AS visitor_name,
+      v.contact_number,
+      v.address AS visitor_address,
+      o.office_name
+    FROM visit_logs l
+    JOIN visitors v ON v.id = l.visitor_id
+    JOIN offices o ON o.id = l.office_id
+    LEFT JOIN visitor_links vl 
+      ON vl.id = (
+        SELECT id FROM visitor_links 
+        WHERE visitor_id = l.visitor_id 
+        ORDER BY created_at DESC 
+        LIMIT 1
+      )
+    ${whereClause}
+    ORDER BY l.time_in DESC
+    LIMIT ? OFFSET ?
+  `,
       )
       .all(...params, limit, offset);
 
@@ -129,6 +142,135 @@ class VisitLog {
 
     const result = stmt.run(id);
     return result.changes > 0;
+  }
+
+  // This method is specifically for staff users to view logs related to their assigned offices
+  static findLogsByUserOffices({
+    userId,
+    visitorName,
+    startDate,
+    endDate,
+    limit = 20,
+    offset = 0,
+  }) {
+    if (!userId) {
+      throw new Error("userId is required for staff access");
+    }
+
+    const conditions = ["uo.user_id = ?"];
+    const params = [userId];
+
+    if (visitorName) {
+      conditions.push("LOWER(v.fullname) LIKE LOWER(?)");
+      params.push(`%${visitorName}%`);
+    }
+
+    if (startDate) {
+      conditions.push("DATE(l.time_in) >= DATE(?)");
+      params.push(startDate);
+    }
+
+    if (endDate) {
+      conditions.push("DATE(l.time_in) <= DATE(?)");
+      params.push(endDate);
+    }
+
+    const whereClause = `WHERE ${conditions.join(" AND ")}`;
+
+    const rows = db
+      .prepare(
+        `
+    SELECT 
+      l.*,
+      vl.token,
+      v.fullname AS visitor_name,
+      v.contact_number,
+      v.address AS visitor_address,
+      o.office_name
+    FROM visit_logs l
+    JOIN visitors v ON v.id = l.visitor_id
+    JOIN offices o ON o.id = l.office_id
+    JOIN user_offices uo ON uo.office_id = l.office_id
+    LEFT JOIN visitor_links vl 
+      ON vl.id = (
+        SELECT id FROM visitor_links 
+        WHERE visitor_id = l.visitor_id 
+        ORDER BY created_at DESC 
+        LIMIT 1
+      )
+    ${whereClause}
+    ORDER BY l.time_in DESC
+    LIMIT ? OFFSET ?
+  `,
+      )
+      .all(...params, limit, offset);
+
+    const countStmt = db.prepare(`
+    SELECT COUNT(*) AS total
+    FROM visit_logs l
+    JOIN visitors v ON v.id = l.visitor_id
+    JOIN offices o ON o.id = l.office_id
+    JOIN user_offices uo ON uo.office_id = l.office_id
+    ${whereClause}
+  `);
+
+    const total = countStmt.get(...params).total;
+
+    return { rows, total };
+  }
+
+  // This method is for staff users to quickly view pending visits related to their assigned offices
+  static findPendingByUserOffice({ userId, limit = 20, offset = 0 }) {
+    if (!userId) {
+      throw new Error("userId is required");
+    }
+
+    const rows = db
+      .prepare(
+        `
+      SELECT 
+        l.*,
+        vl.token,
+        v.fullname AS visitor_name,
+        v.contact_number,
+        v.address AS visitor_address,
+        o.office_name
+      FROM visit_logs l
+      JOIN visitors v ON v.id = l.visitor_id
+      JOIN offices o ON o.id = l.office_id
+      JOIN users u ON u.office_id = l.office_id
+      LEFT JOIN visitor_links vl 
+        ON vl.id = (
+          SELECT id FROM visitor_links 
+          WHERE visitor_id = l.visitor_id 
+          ORDER BY created_at DESC 
+          LIMIT 1
+        )
+      WHERE 
+        u.id = ?
+        AND l.status = 'pending'
+        AND l.office_id = u.office_id
+      ORDER BY l.time_in DESC
+      LIMIT ? OFFSET ?
+      `,
+      )
+      .all(userId, limit, offset);
+
+    const total = db
+      .prepare(
+        `
+      SELECT COUNT(*) AS total
+      FROM visit_logs l
+      JOIN users u ON u.office_id = l.office_id
+      WHERE 
+        u.id = ?
+        AND l.status = 'pending'
+        AND l.office_id = u.office_id
+      `,
+      )
+      .get(userId).total;
+
+    return { rows, total };
   }
 }
 
