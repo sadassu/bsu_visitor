@@ -1,5 +1,5 @@
 <template>
-  <div class="p-6 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+  <div class="p-6 bg-linear-to-br from-gray-50 to-gray-100 min-h-screen">
     <div class="max-w-7xl mx-auto">
       <!-- Header Section -->
       <div class="mb-8 text-center md:text-left">
