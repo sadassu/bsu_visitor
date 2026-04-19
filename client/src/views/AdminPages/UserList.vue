@@ -104,9 +104,9 @@
     v-if="!userStore.loading && userStore.users.length > 0"
     class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200"
   >
-    <p class="text-blue-900 font-semibold">
-      Total Users:
-      <span class="text-2xl text-blue-800">{{ userStore.users.length }}</span>
+    <p class="text-blue-900">
+      Total users:
+      <span class="text-blue-800">{{ userStore.users.length }}</span>
     </p>
   </div>
 </template>
@@ -123,8 +123,8 @@ const showCreateUser = ref(false);
 
 const roleMap = {
   1: "Admin",
-  2: "Staff",
-  3: "Visitor",
+  2: "Security",
+  3: "Staff",
 };
 
 onMounted(() => {

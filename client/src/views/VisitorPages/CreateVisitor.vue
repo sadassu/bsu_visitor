@@ -15,7 +15,7 @@
         </h1>
         <p class="mt-3 text-sm leading-6 text-slate-600 sm:text-base">
           Search for an existing visitor or register a new one, then choose an
-          office and create a mobile access link valid for 1 hour.
+          office and create a mobile access link.
         </p>
       </div>
 
@@ -192,10 +192,6 @@
         <div
           class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
         >
-          <p class="text-sm text-slate-500">
-            After saving, a mobile access link will be created and valid for 1
-            hour.
-          </p>
           <button
             type="submit"
             :disabled="loading"
@@ -347,8 +343,7 @@ const onSubmit = async () => {
 
     if (selectedVisitor.value) {
       formData.append("visitor_id", selectedVisitor.value.id);
-    }
-    else {
+    } else {
       if (!fullname.value || !contact_number.value || !address.value) {
         error.value = "fullname, contact number, and address are required.";
         return;

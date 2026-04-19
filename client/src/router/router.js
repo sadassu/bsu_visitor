@@ -18,6 +18,8 @@ import { roleMiddleware } from "../middleware/role.middleware.js";
 import UnauthorizePage from "../views/ErrorPages/UnauthorizePage.vue";
 import Offices from "../views/AdminPages/Offices.vue";
 import ShowVisitors from "../views/VisitorPages/ShowVisitors.vue";
+import VisitorStatus from "../views/GuardPages/VisitorStatus.vue";
+import OfficeStatus from "../views/GuardPages/OfficeStatus.vue";
 
 const routes = [
   { path: "/", name: "Home", component: HomePage },
@@ -114,8 +116,29 @@ const routes = [
         beforeEnter: roleMiddleware("staff"),
       },
       {
-        path: "", 
+        path: "",
         redirect: { name: "StaffDashboard" },
+      },
+    ],
+  },
+  {
+    path: "/security",
+    name: "SecurityPanel",
+    component: AdminLayout,
+    children: [
+      {
+        path: "visitors/status",
+        name: "SecurityVisitorStatus",
+        component: VisitorStatus,
+        meta: { requiresAuth: true },
+        beforeEnter: roleMiddleware("security"),
+      },
+      {
+        path: "offices/status",
+        name: "SecurityOfficeStatus",
+        component: OfficeStatus,
+        meta: { requiresAuth: true },
+        beforeEnter: roleMiddleware("security"),
       }
     ],
   },

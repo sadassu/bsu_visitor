@@ -22,7 +22,7 @@ export const useOfficeStore = defineStore("office", {
     offices: [],
     office: null,
     loading: false,
-    fetchingOffices: false, 
+    fetchingOffices: false,
     updatingStatus: false,
     error: null,
     successMessage: "",
@@ -91,6 +91,44 @@ export const useOfficeStore = defineStore("office", {
 
         const data = await handleResponse(response);
         this.office = data;
+        this.successMessage = `Office status updated to ${status}.`;
+        return data;
+      } catch (error) {
+        this.error = error.message;
+        throw error;
+      } finally {
+        this.updatingStatus = false;
+      }
+    },
+
+    async updateOfficeStatusBySecurity(status) {
+      if (!this.office || this.office.status === status) return;
+
+      this.updatingStatus = true;
+      this.error = null;
+      this.successMessage = "";
+
+      try {
+        const response = await fetch(
+          `${API_BASE}/security-guard/office/${this.office.id}/status`,
+          {
+            method: "PATCH", 
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ status }),
+          },
+        );
+
+        const data = await handleResponse(response);
+
+        if (data.new_status) {
+          this.office.status = data.new_status;
+        } else {
+          this.office = data;
+        }
+
         this.successMessage = `Office status updated to ${status}.`;
         return data;
       } catch (error) {

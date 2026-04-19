@@ -95,36 +95,6 @@
           </p>
         </article>
       </section>
-
-      <!-- DASHBOARD CTA -->
-      <section
-        class="mt-10 grid gap-6 rounded-[28px] border border-slate-200 bg-white p-8 shadow-[0_18px_50px_rgba(109,112,147,0.08)] md:grid-cols-[1.25fr_0.75fr] mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
-        id="logs"
-      >
-        <div>
-          <h2 class="text-2xl font-semibold text-slate-950">
-            Visitor workflow in one dashboard
-          </h2>
-          <p class="mt-4 max-w-2xl text-slate-600">
-            The homepage puts immediate visitor status and actions front and
-            center so campus staff can respond quickly.
-          </p>
-        </div>
-
-        <div class="flex flex-col justify-center gap-4 sm:flex-row">
-          <button
-            class="rounded-2xl bg-red-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-700"
-          >
-            Open Visitor List
-          </button>
-
-          <button
-            class="rounded-2xl bg-slate-100 px-6 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-200"
-          >
-            Review Logs
-          </button>
-        </div>
-      </section>
     </main>
   </div>
 </template>

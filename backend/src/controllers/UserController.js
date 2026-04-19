@@ -96,7 +96,7 @@ class UserController {
           username: user.username,
           role_id: user.role_id,
           office_id: user.office_id,
-          role: user.role, 
+          role: user.role,
         },
       });
     } catch (error) {
@@ -142,7 +142,12 @@ class UserController {
       const { fullname, username, password, role_id, office_id } = req.body;
       const normalizedRoleId = Number(role_id);
       const normalizedOfficeId =
-        office_id === "" || office_id === undefined ? null : Number(office_id);
+        office_id === undefined ||
+        office_id === null ||
+        office_id === "" ||
+        isNaN(Number(office_id))
+          ? null
+          : Number(office_id);
 
       if (!fullname || !username || !password || !normalizedRoleId) {
         return res.status(400).json({

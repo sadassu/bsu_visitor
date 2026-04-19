@@ -13,6 +13,7 @@ import officeRoutes from "./routes/officeRoutes.js";
 import visitorLinkRoutes from "./routes/visitorLinkRoutes.js";
 import roleRoutes from "./routes/roleRoutes.js";
 import visitorStatusRoutes from "./routes/visitorStatusRoutes.js";
+import securityGuardRoutes from "./routes/securityGuardRoutes.js";
 
 const app = express();
 
@@ -39,6 +40,7 @@ app.use("/api/visitors", visitorRoutes);
 app.use("/api/offices", officeRoutes);
 app.use("/api/visitor-links", visitorLinkRoutes);
 app.use("/api/visitor-status", visitorStatusRoutes);
+app.use("/api/security-guard", securityGuardRoutes);
 app.use("/api/roles", roleRoutes);
 // Health check
 app.get("/api/health", (req, res) => {

@@ -135,8 +135,9 @@ export default {
         ],
 
         security: [
-          { name: "Visitor Logs", path: "/visitors/logs" },
+          { name: "Visitor Status", path: "/security/visitors/status" },
           { name: "Security Panel", path: "/security" },
+          { name: "Office Status", path: "/security/offices/status" },
         ],
       },
     };

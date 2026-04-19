@@ -109,8 +109,9 @@ export default {
 
         security: [
           { name: "Availability", path: "/" },
+          { name: "Register Visitor", path: "/visitors/create" },
           { name: "Visitor Log", path: "/visitors/logs" },
-          { name: "Security Panel", path: "/security" },
+          { name: "Security Panel", path: "/security/visitors/status" },
         ],
       },
     };

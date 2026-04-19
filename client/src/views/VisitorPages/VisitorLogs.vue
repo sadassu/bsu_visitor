@@ -127,6 +127,7 @@
                 <th class="px-4 py-3 text-left font-semibold">Visitor</th>
                 <th class="px-4 py-3 text-left font-semibold">Office</th>
                 <th class="px-4 py-3 text-left font-semibold">Purpose</th>
+                <th class="px-4 py-3 text-left font-semibold">Status</th>
                 <th class="px-4 py-3 text-left font-semibold">Time Out</th>
               </tr>
             </thead>
@@ -163,6 +164,9 @@
                 <td class="px-4 py-4 text-slate-700">{{ log.office_name }}</td>
                 <td class="px-4 py-4 text-slate-700">
                   {{ log.purpose || "-" }}
+                </td>
+                <td class="px-4 py-4 text-slate-700">
+                  {{ log.status || "-" }}
                 </td>
                 <td class="px-4 py-4 text-slate-700">
                   {{ log.time_out ? formatDateTime(log.time_out) : "Active" }}
