@@ -17,6 +17,7 @@ import StaffVisitorLogs from "../views/StaffPages/StaffVisitorLogs.vue";
 import { roleMiddleware } from "../middleware/role.middleware.js";
 import UnauthorizePage from "../views/ErrorPages/UnauthorizePage.vue";
 import Offices from "../views/AdminPages/Offices.vue";
+import ShowVisitors from "../views/VisitorPages/ShowVisitors.vue";
 
 const routes = [
   { path: "/", name: "Home", component: HomePage },
@@ -102,6 +103,13 @@ const routes = [
         path: "visitors/logs",
         name: "StaffVisitorLogs",
         component: StaffVisitorLogs,
+        meta: { requiresAuth: true },
+        beforeEnter: roleMiddleware("staff"),
+      },
+      {
+        path: "visitors",
+        name: "VisitorProfile",
+        component: ShowVisitors,
         meta: { requiresAuth: true },
         beforeEnter: roleMiddleware("staff"),
       },

@@ -11,6 +11,7 @@ router.get(
   authMiddleware,
   VisitorLogController.getPendingByUserOffice,
 );
+router.get("/counts", authMiddleware, VisitorLogController.countPerOffice);
 router.get("/:id", authMiddleware, VisitorLogController.getById);
 router.post(
   "/register",

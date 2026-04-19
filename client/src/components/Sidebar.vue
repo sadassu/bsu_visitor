@@ -131,6 +131,7 @@ export default {
           { name: "Dashboard", path: "/staff/dashboard" },
           { name: "Visitor Queue", path: "/staff/visitors/queue" },
           { name: "Visitor Logs", path: "/staff/visitors/logs" },
+          { name: "Visitor Profiles", path: "/staff/visitors" },
         ],
 
         security: [

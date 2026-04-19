@@ -19,6 +19,21 @@ class VisitLog {
     return result.lastInsertRowid;
   }
 
+  static countPerOffice() {
+    const stmt = db.prepare(`
+    SELECT 
+      l.office_id,
+      o.office_name,
+      COUNT(*) AS total_visits
+    FROM visit_logs l
+    JOIN offices o ON o.id = l.office_id
+    GROUP BY l.office_id
+    ORDER BY total_visits DESC
+  `);
+
+    return stmt.all();
+  }
+
   static findById(id) {
     const stmt = db.prepare(`
       SELECT * FROM visit_logs WHERE id = ?

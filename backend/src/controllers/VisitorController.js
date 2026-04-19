@@ -70,20 +70,21 @@ class VisitorController {
   static update(req, res) {
     try {
       const { id } = req.params;
-      const { fullname, contact_number, address, id_type, img } = req.body;
-
       const visitor = Visitor.findById(id);
+
       if (!visitor) {
         return res.status(404).json({ error: "Visitor not found" });
       }
 
-      const success = Visitor.update(id, {
-        fullname: fullname || visitor.fullname,
-        contact_number: contact_number || visitor.contact_number,
-        address: address || visitor.address,
-        id_type: id_type !== undefined ? id_type : visitor.id_type,
-        img: img !== undefined ? img : visitor.img,
-      });
+      const updatedData = {
+        fullname: req.body.fullname ?? visitor.fullname,
+        contact_number: req.body.contact_number ?? visitor.contact_number,
+        address: req.body.address ?? visitor.address,
+        id_type: req.body.id_type ?? visitor.id_type,
+        img: req.body.img ?? visitor.img,
+      };
+
+      const success = Visitor.update(id, updatedData);
 
       if (!success) {
         return res.status(400).json({ error: "Unable to update visitor" });

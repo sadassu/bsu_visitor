@@ -94,6 +94,21 @@ class VisitorLogController {
     }
   }
 
+  static countPerOffice(req, res) {
+    try {
+      const data = VisitLog.countPerOffice();
+
+      return res.json({
+        message: "Count per office fetched successfully",
+        data,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        error: error.message,
+      });
+    }
+  }
+
   static create(req, res) {
     try {
       const { visitor_id, office_id, purpose } = req.body;

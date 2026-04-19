@@ -73,6 +73,29 @@ export const useVisitorLogStore = defineStore("visitorLog", {
       }
     },
 
+    async fetchCountPerOffice() {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const response = await fetch(`${VISITOR_LOG_ENDPOINT}/counts`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+        const data = await handleResponse(response);
+
+        return data;
+      } catch (error) {
+        this.error = error.message;
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
     async fetchByStatus({ status, page = 1, perPage = 20 }) {
       this.loading = true;
       this.error = null;

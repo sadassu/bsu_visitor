@@ -19,7 +19,7 @@
             Welcome to BSU Visitor
           </p>
 
-          <!-- Cards -->
+          <!-- Office Cards -->
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <div
               v-for="office in officeStore.offices"
@@ -36,7 +36,11 @@
               <!-- Content -->
               <div class="p-6 text-white text-center space-y-3">
                 <p class="text-sm opacity-90">No. of Queue</p>
-                <p class="text-4xl font-bold">12</p>
+
+                <!-- ✅ DYNAMIC COUNT -->
+                <p class="text-4xl font-bold">
+                  {{ officeCounts[office.id] ?? 0 }}
+                </p>
 
                 <div>
                   <p class="text-sm opacity-90">Status</p>
@@ -55,6 +59,7 @@
         </div>
       </section>
 
+      <!-- INFO CARDS -->
       <section
         class="mt-10 grid gap-6 md:grid-cols-3 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
       >
@@ -69,6 +74,7 @@
             details.
           </p>
         </article>
+
         <article
           class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
         >
@@ -78,6 +84,7 @@
             visits.
           </p>
         </article>
+
         <article
           class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
         >
@@ -89,6 +96,7 @@
         </article>
       </section>
 
+      <!-- DASHBOARD CTA -->
       <section
         class="mt-10 grid gap-6 rounded-[28px] border border-slate-200 bg-white p-8 shadow-[0_18px_50px_rgba(109,112,147,0.08)] md:grid-cols-[1.25fr_0.75fr] mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
         id="logs"
@@ -102,12 +110,14 @@
             center so campus staff can respond quickly.
           </p>
         </div>
+
         <div class="flex flex-col justify-center gap-4 sm:flex-row">
           <button
             class="rounded-2xl bg-red-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-red-700"
           >
             Open Visitor List
           </button>
+
           <button
             class="rounded-2xl bg-slate-100 px-6 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-200"
           >
@@ -120,13 +130,26 @@
 </template>
 
 <script setup>
-import { onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { useOfficeStore } from "../store/office";
+import { useVisitorLogStore } from "../store/visitorLog";
 import Navbar from "../components/Navbar.vue";
 
 const officeStore = useOfficeStore();
+const visitorLogStore = useVisitorLogStore();
 
-onMounted(() => {
-  officeStore.fetchOffices();
+const officeCounts = ref({});
+
+onMounted(async () => {
+  // fetch offices
+  await officeStore.fetchOffices();
+
+  // fetch visit counts
+  const res = await visitorLogStore.fetchCountPerOffice();
+
+  // convert array → object map
+  officeCounts.value = Object.fromEntries(
+    res.data.map((item) => [item.office_id, item.total_visits]),
+  );
 });
 </script>
