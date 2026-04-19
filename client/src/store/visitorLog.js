@@ -28,6 +28,51 @@ export const useVisitorLogStore = defineStore("visitorLog", {
   }),
 
   actions: {
+    async fetchVisitLogs({
+      visitorName = "",
+      startDate = "",
+      endDate = "",
+      page = 1,
+      perPage = 20,
+    } = {}) {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const params = new URLSearchParams({
+          visitor_name: visitorName,
+          start_date: startDate,
+          end_date: endDate,
+          page: String(page),
+          per_page: String(perPage),
+        });
+
+        const response = await fetch(
+          `${VISITOR_LOG_ENDPOINT}?${params.toString()}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          },
+        );
+
+        const data = await handleResponse(response);
+
+        this.logs = data.logs || [];
+        this.total = data.total || 0;
+        this.page = data.page || page;
+        this.perPage = data.per_page || perPage;
+
+        return data;
+      } catch (error) {
+        this.error = error.message;
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
     async fetchByStatus({ status, page = 1, perPage = 20 }) {
       this.loading = true;
       this.error = null;
@@ -70,6 +115,32 @@ export const useVisitorLogStore = defineStore("visitorLog", {
       return this.fetchByStatus({ status: "pending", page, perPage });
     },
 
+    async deleteLog(id) {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const response = await fetch(`${VISITOR_LOG_ENDPOINT}/${id}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+        const data = await handleResponse(response);
+
+        this.logs = this.logs.filter((log) => log.id !== id);
+        this.total = Math.max(0, this.total - 1);
+
+        return data;
+      } catch (error) {
+        this.error = error.message;
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
     async registerVisit(formData) {
       this.loading = true;
       this.error = null;
@@ -81,7 +152,7 @@ export const useVisitorLogStore = defineStore("visitorLog", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
-          body: formData, 
+          body: formData,
         });
 
         const data = await handleResponse(response);

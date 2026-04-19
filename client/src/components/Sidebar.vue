@@ -130,6 +130,7 @@ export default {
         staff: [
           { name: "Dashboard", path: "/staff/dashboard" },
           { name: "Visitor Queue", path: "/staff/visitors/queue" },
+          { name: "Visitor Logs", path: "/staff/visitors/logs" },
         ],
 
         security: [

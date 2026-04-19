@@ -124,30 +124,16 @@ class VisitorLogController {
   static getAll(req, res) {
     try {
       const {
-        visitor_id,
-        office_id,
-        active,
         visitor_name,
         start_date,
         end_date,
         page = 1,
         per_page = 20,
       } = req.query;
+
       const pageNumber = Number(page) || 1;
       const perPage = Number(per_page) || 20;
       const offset = (pageNumber - 1) * perPage;
-
-      if (active === "true" || active === "1") {
-        return res.json(VisitLog.findActiveVisits());
-      }
-
-      if (visitor_id) {
-        return res.json(VisitLog.findByVisitorId(visitor_id));
-      }
-
-      if (office_id) {
-        return res.json(VisitLog.findByOfficeId(office_id));
-      }
 
       const { rows, total } = VisitLog.findLogs({
         visitorName: visitor_name,
@@ -157,17 +143,18 @@ class VisitorLogController {
         offset,
       });
 
-      res.json({
+      return res.json({
         logs: rows,
         total,
         page: pageNumber,
         per_page: perPage,
       });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
   }
 
+  //not used
   static getById(req, res) {
     try {
       const { id } = req.params;
@@ -183,6 +170,7 @@ class VisitorLogController {
     }
   }
 
+  //not used
   static update(req, res) {
     try {
       const { id } = req.params;
