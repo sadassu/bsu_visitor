@@ -8,13 +8,23 @@ class VisitorStatus {
     if (!visitLogId) throw new Error("visitLogId is required");
     if (!status) throw new Error("status is required");
 
-    const stmt = db.prepare(`
-      UPDATE visit_logs
-      SET status = ?
-      WHERE id = ?
-    `);
+    let query = `
+    UPDATE visit_logs
+    SET status = ?
+  `;
 
-    const result = stmt.run(status, visitLogId);
+    const params = [status];
+
+    if (status === "completed") {
+      query += `, time_out = COALESCE(time_out, CURRENT_TIMESTAMP)`;
+    }
+
+    query += ` WHERE id = ?`;
+    params.push(visitLogId);
+
+    const stmt = db.prepare(query);
+    const result = stmt.run(...params);
+
     return result.changes > 0;
   }
 
@@ -42,7 +52,6 @@ class VisitorStatus {
     const result = stmt.run(status, ...params);
     return result.changes;
   }
-
 
   static findByStatusAndOffice({ userId, status, limit = 20, offset = 0 }) {
     if (!userId) throw new Error("userId is required");
