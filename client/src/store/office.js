@@ -101,6 +101,46 @@ export const useOfficeStore = defineStore("office", {
       }
     },
 
+    async updateOffice(id, payload) {
+      this.loading = true;
+      this.error = null;
+      this.successMessage = "";
+
+      try {
+        const response = await fetch(`${OFFICE_ENDPOINT}/${id}`, {
+          method: "PUT",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await handleResponse(response);
+
+        const index = this.offices.findIndex((o) => o.id === id);
+        if (index !== -1) {
+          this.offices[index] = {
+            ...this.offices[index],
+            ...payload,
+          };
+        }
+
+        if (this.office?.id === id) {
+          this.office = data;
+        }
+
+        this.successMessage = "Office updated successfully.";
+
+        return data;
+      } catch (error) {
+        this.error = error.message;
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
     async updateOfficeStatusBySecurity(status) {
       if (!this.office || this.office.status === status) return;
 
@@ -112,7 +152,7 @@ export const useOfficeStore = defineStore("office", {
         const response = await fetch(
           `${API_BASE}/security-guard/office/${this.office.id}/status`,
           {
-            method: "PATCH", 
+            method: "PATCH",
             credentials: "include",
             headers: {
               "Content-Type": "application/json",

@@ -20,9 +20,22 @@ import Offices from "../views/AdminPages/Offices.vue";
 import ShowVisitors from "../views/VisitorPages/ShowVisitors.vue";
 import VisitorStatus from "../views/GuardPages/VisitorStatus.vue";
 import OfficeStatus from "../views/GuardPages/OfficeStatus.vue";
+import ShowQr from "../views/VisitorPages/ShowQr.vue";
 
 const routes = [
   { path: "/", name: "Home", component: HomePage },
+  {
+    path: "/visitor-access/:token",
+    name: "VisitorAccess",
+    component: VisitorAccess,
+    meta: { requiresAuth: false },
+  },
+  {
+    path: "/qr-code",
+    name: "QRCode",
+    component: ShowQr,
+    meta: { requiresAuth: true },
+  },
   {
     path: "/login",
     name: "Login",
@@ -41,11 +54,6 @@ const routes = [
     name: "VisitorLogs",
     component: VisitorLogs,
     meta: { requiresAuth: true },
-  },
-  {
-    path: "/visitor-access/:token",
-    name: "VisitorAccess",
-    component: VisitorAccess,
   },
   {
     path: "/unauthorized",
@@ -139,7 +147,7 @@ const routes = [
         component: OfficeStatus,
         meta: { requiresAuth: true },
         beforeEnter: roleMiddleware("security"),
-      }
+      },
     ],
   },
 ];

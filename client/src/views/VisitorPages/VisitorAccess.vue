@@ -58,6 +58,8 @@
               <p><strong>Longitude:</strong> {{ office.longitude }}</p>
               <p><strong>Distance:</strong> {{ formatDistance }} away</p>
               <p><strong>Direction:</strong> {{ direction }}</p>
+              <p><strong>Your Latitude:</strong> {{ currentLatitude }}</p>
+              <p><strong>Your Longitude:</strong> {{ currentLongitude }}</p>
             </div>
           </div>
         </div>
@@ -67,7 +69,8 @@
             AR destination marker
           </p>
           <p class="mt-2 text-sm text-slate-500">
-            Point your camera toward the marker. The arrow points to your destination.
+            Point your camera toward the marker. The arrow points to your
+            destination.
           </p>
 
           <div class="mt-4 flex flex-wrap gap-3">
@@ -144,13 +147,13 @@
                 renderer="antialias: true; alpha: true"
                 style="width: 100%; height: 100%"
               >
-                <a-camera 
+                <a-camera
                   gps-new-camera="gpsMinDistance: 0; simulateLatitude: 0; simulateLongitude: 0; positionMinAccuracy: 10"
                   rotation-reader
                 ></a-camera>
 
                 <!-- Precise destination marker with multiple visual layers -->
-                
+
                 <!-- Main glowing sphere - visible from distance -->
                 <a-entity
                   :gps-new-entity-place="gpsPlace"
@@ -247,7 +250,7 @@
                   v-for="i in 8"
                   :key="i"
                   :gps-new-entity-place="gpsPlace"
-                  :position="`${Math.sin(i * Math.PI / 4) * 4} ${i * 1.5} ${Math.cos(i * Math.PI / 4) * 4}`"
+                  :position="`${Math.sin((i * Math.PI) / 4) * 4} ${i * 1.5} ${Math.cos((i * Math.PI) / 4) * 4}`"
                   scale="3 3 3"
                 >
                   <a-sphere
@@ -307,7 +310,7 @@ const formatDistance = computed(() => {
 
 const direction = computed(() => {
   if (!bearing.value) return "Calculating...";
-  const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+  const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
   const index = Math.round(bearing.value / 45) % 8;
   return `${bearing.value.toFixed(0)}° (${directions[index]})`;
 });
@@ -322,22 +325,27 @@ const distanceText = computed(() => {
 
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
   const R = 6371; // Earth's radius in km
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = 
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-    Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 };
 
 const calculateBearing = (lat1, lon1, lat2, lon2) => {
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const y = Math.sin(dLon) * Math.cos(lat2 * Math.PI / 180);
-  const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) -
-            Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos(dLon);
-  let brng = Math.atan2(y, x) * 180 / Math.PI;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const y = Math.sin(dLon) * Math.cos((lat2 * Math.PI) / 180);
+  const x =
+    Math.cos((lat1 * Math.PI) / 180) * Math.sin((lat2 * Math.PI) / 180) -
+    Math.sin((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.cos(dLon);
+  let brng = (Math.atan2(y, x) * 180) / Math.PI;
   return (brng + 360) % 360;
 };
 
@@ -346,38 +354,46 @@ let watchId = null;
 const updatePosition = (position) => {
   currentPosition.value = position;
   gpsAccuracy.value = Math.round(position.coords.accuracy);
-  
+
   if (office.value) {
     distance.value = calculateDistance(
       position.coords.latitude,
       position.coords.longitude,
       office.value.latitude,
-      office.value.longitude
+      office.value.longitude,
     );
-    
+
     bearing.value = calculateBearing(
       position.coords.latitude,
       position.coords.longitude,
       office.value.latitude,
-      office.value.longitude
+      office.value.longitude,
     );
   }
-  
+
   gpsAllowed.value = true;
 };
+
+const currentLatitude = computed(() =>
+  currentPosition.value ? currentPosition.value.coords.latitude : null,
+);
+
+const currentLongitude = computed(() =>
+  currentPosition.value ? currentPosition.value.coords.longitude : null,
+);
 
 const requestCamera = async () => {
   cameraRequesting.value = true;
   permissionError.value = "";
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ 
-      video: { 
-        facingMode: 'environment',
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: "environment",
         width: { ideal: 1920 },
-        height: { ideal: 1080 }
-      } 
+        height: { ideal: 1080 },
+      },
     });
-    stream.getTracks().forEach(track => track.stop());
+    stream.getTracks().forEach((track) => track.stop());
     cameraAllowed.value = true;
   } catch (err) {
     permissionError.value = "Camera access denied or not available.";
@@ -394,12 +410,12 @@ const requestGps = () => {
     gpsRequesting.value = false;
     return;
   }
-  
+
   navigator.geolocation.getCurrentPosition(
     (position) => {
       updatePosition(position);
       gpsRequesting.value = false;
-      
+
       // Start watching position for updates
       if (watchId) {
         navigator.geolocation.clearWatch(watchId);
@@ -409,18 +425,18 @@ const requestGps = () => {
         (err) => {
           permissionError.value = "Error tracking location: " + err.message;
         },
-        { 
-          enableHighAccuracy: true, 
+        {
+          enableHighAccuracy: true,
           timeout: 10000,
-          maximumAge: 0
-        }
+          maximumAge: 0,
+        },
       );
     },
     (err) => {
       permissionError.value = "Location access denied or not available.";
       gpsRequesting.value = false;
     },
-    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
   );
 };
 

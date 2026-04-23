@@ -97,6 +97,7 @@ export default {
           { name: "Availability", path: "/" },
           { name: "Register Visitor", path: "/visitors/create" },
           { name: "Visitor Log", path: "/visitors/logs" },
+          { name: "QR Codes", path: "/qr-code" },
           { name: "Admin Dashboard", path: "/admin/dashboard" },
         ],
 
@@ -104,6 +105,7 @@ export default {
           { name: "Availability", path: "/" },
           { name: "Register Visitor", path: "/visitors/create" },
           { name: "Visitor Log", path: "/visitors/logs" },
+          { name: "QR Codes", path: "/qr-code" },
           { name: "Staff Dashboard", path: "/staff/dashboard" },
         ],
 
@@ -111,6 +113,7 @@ export default {
           { name: "Availability", path: "/" },
           { name: "Register Visitor", path: "/visitors/create" },
           { name: "Visitor Log", path: "/visitors/logs" },
+          { name: "QR Codes", path: "/qr-code" },
           { name: "Security Panel", path: "/security/visitors/status" },
         ],
       },
