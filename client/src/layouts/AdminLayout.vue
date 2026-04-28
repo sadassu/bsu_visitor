@@ -4,6 +4,12 @@
   </Sidebar>
 </template>
 
-<script setup>
+<script>
 import Sidebar from "../components/Sidebar.vue";
+
+export default {
+  components: {
+    Sidebar,
+  },
+};
 </script>

@@ -1,17 +1,19 @@
 import express from "express";
 import OfficeController from "../controllers/OfficeController.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
+import { activityLogger } from "../middleware/activityLogger.js";
 
 const router = express.Router();
 
-router.get("/", authMiddleware, OfficeController.getAll);
+router.use(authMiddleware, activityLogger);
+
+router.get("/", OfficeController.getAll);
 router.get(
   "/staff/dashboard",
-  authMiddleware,
   OfficeController.getStaffOfficeDashboard,
 );
-router.patch("/:id/status", authMiddleware, OfficeController.updateStatus);
+router.patch("/:id/status", OfficeController.updateStatus);
 
-router.put("/:id", authMiddleware, OfficeController.updateOffice);
+router.put("/:id", OfficeController.updateOffice);
 
 export default router;

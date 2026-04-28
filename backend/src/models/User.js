@@ -26,8 +26,12 @@ class User {
   static findById(id) {
     const stmt = db.prepare(`
     SELECT 
-      u.*,
-      r.id AS role_id,
+      u.id,
+      u.fullname,
+      u.username,
+      u.role_id,
+      u.office_id,
+      u.created_at,
       r.role_name AS role_name
     FROM users u
     LEFT JOIN roles r ON u.role_id = r.id
@@ -51,7 +55,6 @@ class User {
     const stmt = db.prepare(`
     SELECT 
       u.*,
-      r.id AS role_id,
       r.role_name AS role_name
     FROM users u
     LEFT JOIN roles r ON u.role_id = r.id
@@ -69,6 +72,32 @@ class User {
         name: user.role_name,
       },
     };
+  }
+
+  static findAll() {
+    const stmt = db.prepare(`
+      SELECT
+        u.id,
+        u.fullname,
+        u.username,
+        u.role_id,
+        u.office_id,
+        u.created_at,
+        r.role_name AS role_name
+      FROM users u
+      LEFT JOIN roles r ON u.role_id = r.id
+      ORDER BY u.created_at DESC
+    `);
+
+    const rows = stmt.all();
+
+    return rows.map((user) => ({
+      ...user,
+      role: {
+        id: user.role_id,
+        name: user.role_name,
+      },
+    }));
   }
 
   static findAllWithLastActivity() {

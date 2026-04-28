@@ -111,15 +111,15 @@ const visitorLogStore = useVisitorLogStore();
 const officeCounts = ref({});
 
 onMounted(async () => {
-  // fetch offices
   await officeStore.fetchOffices();
 
-  // fetch visit counts
   const res = await visitorLogStore.fetchCountPerOffice();
 
-  // convert array → object map
+  // ✅ only count pending
+  const pendingOnly = res.data.filter((item) => item.status === "pending");
+
   officeCounts.value = Object.fromEntries(
-    res.data.map((item) => [item.office_id, item.total_visits]),
+    pendingOnly.map((item) => [item.office_id, item.total_visits]),
   );
 });
 </script>
