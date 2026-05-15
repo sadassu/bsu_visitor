@@ -90,12 +90,15 @@ watch(
 // Mark as left
 async function markAsLeft(log) {
   try {
+    const token = localStorage.getItem("token");
+    const headers = {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+
     await fetch(`/api/visitor-status/${log.id}/status`, {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
+      headers,
       body: JSON.stringify({
         status: "left",
       }),

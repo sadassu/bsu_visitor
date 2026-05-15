@@ -125,6 +125,7 @@ export default {
           { name: "Dashboard", path: "/admin/dashboard" },
           { name: "Users", path: "/admin/users" },
           { name: "Offices", path: "/admin/offices" },
+          { name: "Beacons", path: "/admin/beacons" },
         ],
 
         staff: [

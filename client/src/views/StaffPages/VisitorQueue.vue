@@ -404,6 +404,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import { useVisitorLogStore } from "@/store/visitorLog";
+import { API_BASE } from "@/api.js";
 
 const store = useVisitorLogStore();
 
@@ -455,14 +456,17 @@ const closeModal = () => {
 const confirmNextStatus = async () => {
   if (!selectedLog.value || !nextStatus.value) return;
 
+  const token = localStorage.getItem("token");
+  const headers = {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+
   await fetch(
-    `${import.meta.env.VITE_API_BASE}/visitor-status/${selectedLog.value.id}/status`,
+    `${API_BASE}/visitor-status/${selectedLog.value.id}/status`,
     {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
+      headers,
       body: JSON.stringify({
         status: nextStatus.value,
       }),

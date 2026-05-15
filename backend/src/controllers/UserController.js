@@ -45,13 +45,14 @@ class UserController {
       // Set httpOnly cookie
       res.cookie("authToken", token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production", // Only send over HTTPS in production
-        sameSite: "strict",
-        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        secure: true, // IMPORTANT for HTTPS
+        sameSite: "none", // REQUIRED for cross-origin HTTPS
+        maxAge: 24 * 60 * 60 * 1000,
       });
 
       res.json({
         message: "Login successful",
+        token,
         user: {
           id: user.id,
           fullname: user.fullname,

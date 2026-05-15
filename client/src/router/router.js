@@ -21,6 +21,7 @@ import ShowVisitors from "../views/VisitorPages/ShowVisitors.vue";
 import VisitorStatus from "../views/GuardPages/VisitorStatus.vue";
 import OfficeStatus from "../views/GuardPages/OfficeStatus.vue";
 import ShowQr from "../views/VisitorPages/ShowQr.vue";
+import BeaconManagement from "../views/AdminPages/BeaconManagement.vue";
 
 const routes = [
   { path: "/", name: "Home", component: HomePage },
@@ -82,6 +83,13 @@ const routes = [
         path: "offices", // relative path
         name: "Offices",
         component: Offices,
+        meta: { requiresAuth: true },
+        beforeEnter: roleMiddleware("admin"),
+      },
+      {
+        path: "beacons",
+        name: "Beacons",
+        component: BeaconManagement,
         meta: { requiresAuth: true },
         beforeEnter: roleMiddleware("admin"),
       },

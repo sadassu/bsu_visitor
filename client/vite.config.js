@@ -18,11 +18,11 @@ export default defineConfig({
     port: 5173,
     proxy: {
       "/api": {
-        target: "http://192.168.1.5:8000",
+        target: "http://192.168.1.7:8000",
         changeOrigin: true,
       },
       "/uploads": {
-        target: "http://192.168.1.5:8000",
+        target: "http://192.168.1.7:8000",
         changeOrigin: true,
       },
     },
