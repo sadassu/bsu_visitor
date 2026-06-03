@@ -1,6 +1,11 @@
 // stores/visitorLinks.js
 import { defineStore } from "pinia";
-import { API_BASE } from "@/api.js";
+
+const API_BASE = import.meta.env.VITE_API_BASE;
+
+if (!API_BASE) {
+  throw new Error("VITE_API_BASE is not defined in environment variables");
+}
 
 const VISITOR_LINKS_ENDPOINT = `${API_BASE}/visitor-links`;
 

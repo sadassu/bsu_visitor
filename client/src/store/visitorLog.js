@@ -1,5 +1,10 @@
 import { defineStore } from "pinia";
-import { API_BASE } from "@/api.js";
+
+const API_BASE = import.meta.env.VITE_API_BASE;
+
+if (!API_BASE) {
+  throw new Error("VITE_API_BASE is not defined in environment variables");
+}
 
 const VISITOR_LOG_ENDPOINT = `${API_BASE}/visit-logs`;
 
@@ -10,21 +15,6 @@ function handleResponse(response) {
     }
     return body;
   });
-}
-
-function getAuthHeaders(contentType = null) {
-  const token = localStorage.getItem("token");
-  const headers = {};
-
-  if (contentType) {
-    headers["Content-Type"] = contentType;
-  }
-
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-
-  return headers;
 }
 
 export const useVisitorLogStore = defineStore("visitorLog", {
@@ -61,7 +51,9 @@ export const useVisitorLogStore = defineStore("visitorLog", {
           `${VISITOR_LOG_ENDPOINT}?${params.toString()}`,
           {
             method: "GET",
-            headers: getAuthHeaders(),
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
           },
         );
 
@@ -88,7 +80,9 @@ export const useVisitorLogStore = defineStore("visitorLog", {
       try {
         const response = await fetch(`${VISITOR_LOG_ENDPOINT}/counts`, {
           method: "GET",
-          headers: getAuthHeaders(),
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         });
 
         const data = await handleResponse(response);
@@ -116,7 +110,9 @@ export const useVisitorLogStore = defineStore("visitorLog", {
           `${API_BASE}/visitor-status/status/${status}?${params.toString()}`,
           {
             method: "GET",
-            headers: getAuthHeaders(),
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
           },
         );
 
@@ -149,7 +145,9 @@ export const useVisitorLogStore = defineStore("visitorLog", {
       try {
         const response = await fetch(`${VISITOR_LOG_ENDPOINT}/${id}`, {
           method: "DELETE",
-          headers: getAuthHeaders(),
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         });
 
         const data = await handleResponse(response);
@@ -174,7 +172,9 @@ export const useVisitorLogStore = defineStore("visitorLog", {
         const response = await fetch(`${VISITOR_LOG_ENDPOINT}/register`, {
           method: "POST",
           credentials: "include",
-          headers: getAuthHeaders(),
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
           body: formData,
         });
 

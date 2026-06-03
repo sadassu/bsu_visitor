@@ -6,7 +6,7 @@ import { activityLogger } from "../middleware/activityLogger.js";
 
 const router = express.Router();
 
-router.use( activityLogger);
+router.use(authMiddleware, activityLogger);
 
 router.get("/", VisitorLogController.getAll);
 router.get(

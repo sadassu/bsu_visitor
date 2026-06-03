@@ -1,8 +1,0 @@
-{
-  "appId": "com.yourapp.id",
-  "appName": "YourApp",
-  "webDir": "dist",
-  "server": {
-    "url": "https://intussusceptive-skimpily-ona.ngrok-free.dev"
-  }
-}

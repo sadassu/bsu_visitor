@@ -485,9 +485,11 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useVisitorStore } from "@/store/visitor.js";
-import { IMAGE_BASE } from "@/api.js";
 
 const visitorStore = useVisitorStore();
+
+const API_BASE = import.meta.env.VITE_API_BASE;
+const IMAGE_BASE = API_BASE.replace("/api", "");
 
 // Modal states
 const showEditModal = ref(false);

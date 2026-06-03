@@ -14,36 +14,17 @@ import visitorLinkRoutes from "./routes/visitorLinkRoutes.js";
 import roleRoutes from "./routes/roleRoutes.js";
 import visitorStatusRoutes from "./routes/visitorStatusRoutes.js";
 import securityGuardRoutes from "./routes/securityGuardRoutes.js";
-import beaconRoutes from "./routes/beaconRoutes.js";
 
 const app = express();
-
-const allowedOrigins = [
-  "capacitor://localhost",
-  "capacitor://localhost",
-  "http://localhost",
-  "http://localhost:5173",
-  process.env.CLIENT_URL,
-  "http://192.168.1.7:5173",
-  "https://intussusceptive-skimpily-ona.ngrok-free.dev",
-];
 
 // Middleware
 app.use(helmet());
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
-
-      const allowed = allowedOrigins.some((allowedOrigin) =>
-        origin.startsWith(allowedOrigin),
-      );
-
-      if (allowed) return callback(null, true);
-
-      console.log("Blocked by CORS:", origin);
-      return callback(null, false);
-    },
+    origin: [
+      process.env.CLIENT_URL,
+      "intussusceptive-skimpily-ona.ngrok-free.dev",
+    ],
     credentials: true,
   }),
 );
@@ -61,7 +42,6 @@ app.use("/api/visitor-links", visitorLinkRoutes);
 app.use("/api/visitor-status", visitorStatusRoutes);
 app.use("/api/security-guard", securityGuardRoutes);
 app.use("/api/roles", roleRoutes);
-app.use("/api/beacons", beaconRoutes);
 // Health check
 app.get("/api/health", (req, res) => {
   res.json({ status: "OK" });
